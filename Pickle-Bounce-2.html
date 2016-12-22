@@ -1,0 +1,168 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Pickle Bounce 2</title>
+<body>
+<script src="Assets/Engine/pixi.min.js"></script>
+
+<!--Make the canvas fit nicely inside the window-->
+<style>* {padding: 0; margin: 0}</style>
+
+<script>
+//CONSTANT var for location of sprite files
+//const playerSpriteText = "Assets/SpaceShooterRedux/PNG/playerShip2_red.png";
+var width = 800; //window.innerWidth;
+var height = 600; //window.innerHeight;
+
+//Create a container object called the stage
+var stage = new PIXI.Container();
+
+//Create variables ahead of time
+var state, pickle1, pickle2, ball;
+
+//Keyboard keys needed
+var left = keyboard(65),
+    right = keyboard(68),
+    up = keyboard(87),
+    down = keyboard(83);
+
+//Create the renderer
+var renderer = PIXI.autoDetectRenderer(width,height);
+//Canvas size stuff
+renderer.view.style.position = "absolute";
+renderer.view.style.display = "block";
+//Change background color
+renderer.backgroundColor = 0x061639;
+
+//Add the canvas to the HTMl document
+document.body.appendChild(renderer.view);
+
+//Render the stage
+renderer.render(stage);
+
+//*********************************************************************
+//Setting up the sprites
+//*********************************************************************
+//Use Pixi's built-in `loader` object to load an image
+PIXI.loader
+  .add("Assets/Pickles/pickle.png")
+  .load(setup);
+  
+//This `setup` function will run when the image has loaded
+function setup() {
+
+  //Create the `cat` sprite from the texture
+  pickle1 = new PIXI.Sprite(
+    PIXI.loader.resources["Assets/Pickles/pickle.png"].texture
+  );
+  //Set size and position
+  pickle1.width = 70;
+  pickle1.height = 70;
+  pickle1.x = 200;
+  pickle1.y = 265;
+  pickle1.vx = 0;
+  pickle1.vy = 0;
+  //Set rotation pivot
+  pickle1.pivot.set(35,35);
+
+  //Add the pickle to the stage
+  stage.addChild(pickle1);
+
+  state = play;
+  
+  gameLoop();
+}
+
+//**********************************************************************
+//KEYBOARD LISTENER FUNCTION
+//**********************************************************************
+function keyboard(keyCode) {
+  var key = {};
+  key.code = keyCode;
+  key.isDown = false;
+  key.isUp = true;
+  key.press = undefined;
+  key.held = undefined;
+  key.release = undefined;
+  //The `downHandler`
+  key.downHandler = function(event) {
+    if (event.keyCode === key.code) {
+      if (key.isUp && key.press) key.press();
+      key.isDown = true;
+      key.isUp = false;
+    }
+    event.preventDefault();
+  };
+
+  //The `upHandler`
+  key.upHandler = function(event) {
+    if (event.keyCode === key.code) {
+      if (key.isDown && key.release) key.release();
+      key.isDown = false;
+      key.isUp = true;
+    }
+    event.preventDefault();
+  };
+
+  //Attach event listeners
+  window.addEventListener(
+    "keydown", key.downHandler.bind(key), false
+  );
+  window.addEventListener(
+    "keyup", key.upHandler.bind(key), false
+  );
+  return key;
+}
+
+//**********************************************************************
+//Keyboard movement functions
+//**********************************************************************
+left.press = function(){
+  pickle1.vx = -3;
+};
+left.release = function(){
+  pickle1.vx = 0;
+};
+
+right.press = function(){
+  pickle1.vx += 3;
+};
+right.release = function(){
+  pickle1.vx = 0;
+};
+
+up.press = function(){
+  pickle1.vy = -3;
+};
+up.release = function(){
+  pickle1.vy = 0;
+};
+
+down.press = function(){
+  pickle1.vy = 3;
+};
+down.release = function(){
+  pickle1.vy = 0;
+};
+
+//**********************************************************************
+//GAMELOOP
+//**********************************************************************
+function gameLoop(){
+  requestAnimationFrame(gameLoop);
+  
+  //Run whatever function of the current state
+  state();
+  
+  renderer.render(stage);
+}
+
+//************************************************************************
+//PLAY FUNCTION
+//************************************************************************
+function play(){
+  pickle1.x += pickle1.vx;
+  pickle1.y += pickle1.vy;
+}
+
+</script>
+</body>
